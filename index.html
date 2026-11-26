@@ -1,534 +1,1182 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Лепесток — цветочный магазин</title>
-<meta name="description" content="Свежие букеты с доставкой. Закажите онлайн в магазине «АбуСток».">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-/* ==================== СТИЛИ ==================== */
-:root{
-  --green:#2e4634;--green-light:#4a6b52;--pink:#d9829f;--pink-pale:#fbeef2;
-  --cream:#fbf7f3;--white:#fff;--text:#333a35;--muted:#7a837c;
-  --shadow:0 10px 30px rgba(46,70,52,.10);--radius:14px;--t:.25s ease;
-}
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{font-family:'Montserrat',sans-serif;color:var(--text);background:var(--cream);line-height:1.6;-webkit-font-smoothing:antialiased}
-h1,h2,h3,h4{font-family:'Playfair Display',serif;color:var(--green);line-height:1.2}
-a{text-decoration:none;color:inherit}img{max-width:100%;display:block}
-button,input,select,textarea{font-family:inherit}
-.container{width:min(1180px,92%);margin:0 auto}
-.section{padding:80px 0}.section--pink{background:var(--pink-pale)}
-.section--green{background:var(--green);color:#fff}.section--green h2,.section--green h3{color:#fff}
-.section-title{font-size:clamp(28px,4vw,42px);text-align:center;margin-bottom:12px}
-.section-subtitle{text-align:center;color:var(--muted);max-width:620px;margin:0 auto 45px}
-.section--green .section-subtitle{color:#d7e2d9}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 28px;border:none;border-radius:50px;background:var(--green);color:#fff;font-weight:600;font-size:14px;cursor:pointer;transition:var(--t)}
-.btn:hover{background:var(--green-light);transform:translateY(-2px);box-shadow:var(--shadow)}
-.btn--pink{background:var(--pink)}.btn--pink:hover{background:#c46f8b}
-.btn--outline{background:transparent;border:2px solid var(--green);color:var(--green)}
-.btn--outline:hover{background:var(--green);color:#fff}
-.btn--white{background:#fff;color:var(--green)}.btn--white:hover{background:var(--pink-pale)}
-.btn--block{width:100%}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Палитра — генератор и менеджер цветов</title>
+    <meta name="description"
+        content="Генератор цветовых палитр: избранные цвета, копирование HEX/RGB и проверка контрастности по WCAG.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        /* ==================== ОСНОВА ==================== */
+        :root {
+            --bg: #f4f5f7;
+            --surface: #ffffff;
+            --text: #1d2430;
+            --muted: #7b8494;
+            --line: #e6e9ee;
+            --accent: #6c5ce7;
+            --accent-soft: #efedff;
+            --shadow: 0 8px 28px rgba(29, 36, 48, .07);
+            --radius: 16px;
+            --t: .22s ease;
+        }
 
-/* Шапка */
-.header{position:sticky;top:0;z-index:100;background:rgba(251,247,243,.96);backdrop-filter:blur(10px);box-shadow:0 2px 14px rgba(46,70,52,.07)}
-.header__inner{display:flex;align-items:center;justify-content:space-between;min-height:78px;gap:20px}
-.logo{display:flex;align-items:center;gap:10px}.logo__icon{font-size:30px;line-height:1}
-.logo__text{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--green)}
-.logo__text span{color:var(--pink)}
-.nav{display:flex;align-items:center;gap:30px}
-.nav a{font-size:14px;font-weight:500;position:relative;padding:6px 0;cursor:pointer}
-.nav a::after{content:'';position:absolute;left:0;bottom:0;width:0;height:2px;background:var(--pink);transition:var(--t)}
-.nav a:hover::after,.nav a.active::after{width:100%}.nav a.active{color:var(--pink)}
-.header__actions{display:flex;align-items:center;gap:16px}
-.phone{font-weight:600;font-size:14px;color:var(--green);white-space:nowrap}
-.cart-btn{position:relative;background:none;border:none;cursor:pointer;font-size:24px;padding:4px;line-height:1}
-.cart-count{position:absolute;top:-6px;right:-8px;background:var(--pink);color:#fff;font-size:11px;font-weight:700;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-.cart-count[hidden]{display:none}
-.burger{display:none;background:none;border:none;font-size:26px;cursor:pointer;color:var(--green)}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
 
-/* Hero */
-.hero{position:relative;min-height:560px;display:flex;align-items:center;background:linear-gradient(120deg,rgba(46,70,52,.92),rgba(46,70,52,.55)),url('https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=1600&q=80') center/cover;color:#fff}
-.hero__content{max-width:620px;padding:60px 0}
-.hero__badge{display:inline-block;padding:6px 16px;border:1px solid rgba(255,255,255,.5);border-radius:50px;font-size:12px;letter-spacing:2px;text-transform:uppercase;margin-bottom:22px}
-.hero h1{color:#fff;font-size:clamp(40px,6vw,66px);margin-bottom:20px}
-.hero p{font-size:17px;color:#eef3ee;margin-bottom:32px;max-width:500px}
-.hero__buttons{display:flex;gap:14px;flex-wrap:wrap}
+        html {
+            scroll-behavior: smooth
+        }
 
-/* Плитки */
-.features{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
-.feature{text-align:center;padding:28px 16px;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow)}
-.feature__icon{font-size:36px;margin-bottom:12px}.feature h3{font-size:18px;margin-bottom:6px}.feature p{font-size:13px;color:var(--muted)}
-.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
-.step{text-align:center;padding:30px 18px;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow)}
-.step__num{width:52px;height:52px;border-radius:50%;background:var(--pink-pale);color:var(--pink);font-family:'Playfair Display',serif;font-size:24px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
-.step h3{font-size:18px;margin-bottom:8px}.step p{font-size:13px;color:var(--muted)}
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased
+        }
 
-/* Товары */
-.filters{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-bottom:40px}
-.filter-btn{padding:9px 20px;border:1px solid #d9e0da;background:#fff;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;color:var(--green);transition:var(--t)}
-.filter-btn:hover,.filter-btn.active{background:var(--green);color:#fff;border-color:var(--green)}
-.products{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
-.product{background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);transition:var(--t);display:flex;flex-direction:column}
-.product:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(46,70,52,.16)}
-.product__img-wrap{position:relative;height:250px;overflow:hidden}
-.product__img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
-.product:hover .product__img-wrap img{transform:scale(1.06)}
-.product__tag{position:absolute;top:14px;left:14px;background:var(--pink);color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:50px;text-transform:uppercase}
-.product__body{padding:20px;display:flex;flex-direction:column;flex:1}
-.product__title{font-size:20px;margin-bottom:6px}.product__desc{font-size:13px;color:var(--muted);margin-bottom:16px;flex:1}
-.product__footer{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.product__price{font-size:21px;font-weight:700;color:var(--green)}
-.product .btn{padding:10px 18px;font-size:13px}
+        h1,
+        h2,
+        h3 {
+            letter-spacing: -.02em
+        }
 
-/* О нас */
-.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
-.about-img{border-radius:var(--radius);box-shadow:var(--shadow);height:460px;object-fit:cover;width:100%}
-.about-text h2{font-size:clamp(28px,4vw,42px);margin-bottom:20px}
-.about-text p{color:var(--muted);margin-bottom:16px}
-.stats{display:flex;gap:36px;margin-top:30px;flex-wrap:wrap}
-.stat__num{font-family:'Playfair Display',serif;font-size:34px;color:var(--pink);font-weight:700}
-.stat__label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+        button,
+        input,
+        select {
+            font-family: inherit
+        }
 
-/* Заказ */
-.order-layout{display:grid;grid-template-columns:1.3fr .9fr;gap:40px;align-items:start}
-.cart-items{display:flex;flex-direction:column;gap:14px}
-.cart-item{display:flex;align-items:center;gap:16px;background:#fff;padding:12px;border-radius:12px;box-shadow:var(--shadow)}
-.cart-item img{width:84px;height:84px;object-fit:cover;border-radius:8px}
-.cart-item__info{flex:1}.cart-item__info h4{font-family:'Playfair Display',serif;font-size:17px;color:var(--green)}
-.cart-item__info p{font-size:13px;color:var(--muted)}
-.qty{display:flex;align-items:center;gap:8px}
-.qty button{width:28px;height:28px;border:1px solid #d9e0da;background:#fff;border-radius:6px;cursor:pointer;font-size:16px;color:var(--green);line-height:1}
-.qty button:hover{background:var(--green);color:#fff}.qty span{min-width:20px;text-align:center;font-weight:600}
-.cart-item__sum{font-weight:700;color:var(--green);min-width:90px;text-align:right}
-.remove-btn{background:none;border:none;cursor:pointer;color:#c0504d;font-size:18px;padding:4px}
-.cart-empty{text-align:center;padding:50px 20px;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow)}
-.cart-empty__icon{font-size:54px;margin-bottom:12px}.cart-empty h3{margin-bottom:8px}
-.summary{background:#fff;border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);position:sticky;top:100px}
-.summary h3{font-size:22px;margin-bottom:20px}
-.summary__row{display:flex;justify-content:space-between;margin-bottom:12px;font-size:14px;color:var(--muted)}
-.summary__row--total{border-top:1px dashed #d9e0da;padding-top:16px;margin-top:16px;font-size:20px;font-weight:700;color:var(--green)}
-.form-card{background:#fff;border-radius:var(--radius);padding:32px;box-shadow:var(--shadow)}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.form-group{display:flex;flex-direction:column;gap:6px}.form-group--full{grid-column:1/-1}
-.form-group label{font-size:13px;font-weight:600;color:var(--green)}
-.form-group input,.form-group select,.form-group textarea{padding:12px 14px;border:1px solid #d9e0da;border-radius:8px;font-size:14px;background:#fff;color:var(--text);transition:var(--t);width:100%}
-.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--pink);box-shadow:0 0 0 3px rgba(217,130,159,.15)}
-.form-group textarea{resize:vertical;min-height:90px}
-.form-note{font-size:12px;color:var(--muted);margin-top:14px}
-.input-error{border-color:#c0504d!important}
-.success{text-align:center;max-width:620px;margin:0 auto;padding:50px 20px}
-.success__icon{font-size:72px;margin-bottom:16px}.success h1{font-size:38px;margin-bottom:14px}
-.success p{color:var(--muted);margin-bottom:12px}
-.success__num{display:inline-block;background:var(--pink-pale);color:var(--green);font-weight:700;padding:10px 22px;border-radius:50px;margin:14px 0 26px}
+        button {
+            cursor: pointer
+        }
 
-/* Шторка */
-.overlay{position:fixed;inset:0;background:rgba(20,30,22,.55);z-index:200;display:none;align-items:stretch;justify-content:flex-end}
-.overlay.open{display:flex}
-.drawer{width:min(420px,100%);background:var(--cream);height:100%;overflow-y:auto;padding:24px;box-shadow:-10px 0 40px rgba(0,0,0,.2);animation:slideIn .3s ease}
-@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
-.drawer__head{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}.drawer__head h3{font-size:24px}
-.close-btn{background:none;border:none;font-size:28px;cursor:pointer;color:var(--green);line-height:1}
-.drawer__total{font-size:20px;font-weight:700;display:flex;justify-content:space-between;margin:20px 0;color:var(--green)}
+        .mono {
+            font-family: 'JetBrains Mono', monospace
+        }
 
-/* Подвал */
-.footer{background:var(--green);color:#d7e2d9;padding:60px 0 24px}
-.footer__grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:40px;margin-bottom:40px}
-.footer h4{color:#fff;font-family:'Playfair Display',serif;font-size:18px;margin-bottom:16px}
-.footer p,.footer a{font-size:13px;color:#cfdbd1;display:block;margin-bottom:10px}
-.footer a:hover{color:var(--pink)}.footer .logo__text{color:#fff;font-size:22px}
-.footer__bottom{border-top:1px solid rgba(255,255,255,.15);padding-top:20px;text-align:center;font-size:12px;color:#a9b9ac}
-.breadcrumbs{padding:26px 0 0;font-size:12px;color:var(--muted)}.breadcrumbs a:hover{color:var(--pink)}.breadcrumbs span{margin:0 8px}
-.page-head{text-align:center;padding:44px 0 10px}.page-head h1{font-size:clamp(32px,5vw,50px);margin-bottom:10px}
-.page-head p{color:var(--muted);max-width:600px;margin:0 auto}
-.page[hidden]{display:none!important}
+        .wrap {
+            width: min(1180px, 93%);
+            margin: 0 auto
+        }
 
-@media(max-width:980px){
- .nav{position:absolute;top:78px;left:0;right:0;background:var(--cream);flex-direction:column;align-items:flex-start;gap:0;padding:10px 6%;box-shadow:var(--shadow);display:none}
- .nav.open{display:flex}.nav a{width:100%;padding:12px 0;border-bottom:1px solid #eee}
- .burger{display:block}.features,.steps{grid-template-columns:repeat(2,1fr)}.products{grid-template-columns:repeat(2,1fr)}
- .about-grid{grid-template-columns:1fr;gap:32px}.about-img{height:340px}
- .order-layout{grid-template-columns:1fr}.summary{position:static}.footer__grid{grid-template-columns:repeat(2,1fr)}
-}
-@media(max-width:620px){
- .section{padding:56px 0}.phone{display:none}.products,.features,.steps,.form-grid,.footer__grid{grid-template-columns:1fr}
- .hero{min-height:480px}.hero__buttons .btn{width:100%}.form-group--full{grid-column:auto}
- .cart-item{flex-wrap:wrap}.cart-item__sum{min-width:auto}
-}
-</style>
+        .section {
+            margin-top: 34px
+        }
+
+        /* ==================== ШАПКА ==================== */
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--line);
+            position: sticky;
+            top: 0;
+            z-index: 50
+        }
+
+        .header__in {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 72px;
+            gap: 18px;
+            flex-wrap: wrap
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .brand__logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
+            background: conic-gradient(#ff6b6b, #feca57, #1dd1a1, #54a0ff, #5f27cd, #ff6b6b);
+            box-shadow: inset 0 0 0 5px #fff, 0 4px 14px rgba(0, 0, 0, .08);
+            flex-shrink: 0
+        }
+
+        .brand h1 {
+            font-size: 20px;
+            font-weight: 800
+        }
+
+        .brand p {
+            font-size: 12px;
+            color: var(--muted)
+        }
+
+        .header__links {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap
+        }
+
+        .link-btn {
+            border: 1px solid var(--line);
+            background: var(--surface);
+            padding: 9px 15px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            transition: var(--t)
+        }
+
+        .link-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-soft)
+        }
+
+        /* ==================== КАРТОЧКИ ==================== */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 26px
+        }
+
+        .card__head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 22px;
+            flex-wrap: wrap
+        }
+
+        .card__title {
+            font-size: 19px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .card__title .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--accent)
+        }
+
+        .card__hint {
+            font-size: 12px;
+            color: var(--muted)
+        }
+
+        /* ==================== УПРАВЛЕНИЕ ==================== */
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            align-items: end
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            min-width: 0
+        }
+
+        .field label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .06em
+        }
+
+        .field select,
+        .field input[type=text],
+        .field input[type=number] {
+            width: 100%;
+            padding: 11px 13px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: #fbfcfd;
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 600;
+            transition: var(--t);
+            min-width: 0
+        }
+
+        .field select:focus,
+        .field input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-soft)
+        }
+
+        .color-input {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .color-input input[type=color] {
+            width: 46px;
+            height: 44px;
+            border: none;
+            border-radius: 10px;
+            background: none;
+            padding: 0;
+            cursor: pointer;
+            flex-shrink: 0
+        }
+
+        .color-input input[type=color]::-webkit-color-swatch-wrapper {
+            padding: 0
+        }
+
+        .color-input input[type=color]::-webkit-color-swatch {
+            border: none;
+            border-radius: 10px;
+            border: 1px solid var(--line)
+        }
+
+        input[type=range] {
+            width: 100%;
+            accent-color: var(--accent);
+            margin-top: 10px
+        }
+
+        .range-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 700
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 11px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            transition: var(--t);
+            white-space: nowrap
+        }
+
+        .btn:hover {
+            background: #5b4bd4;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(108, 92, 231, .28)
+        }
+
+        .btn--soft {
+            background: var(--accent-soft);
+            color: var(--accent)
+        }
+
+        .btn--soft:hover {
+            background: #e3dfff;
+            color: var(--accent);
+            box-shadow: none
+        }
+
+        .btn--outline {
+            background: #fff;
+            color: var(--text);
+            border: 1px solid var(--line)
+        }
+
+        .btn--outline:hover {
+            background: var(--bg);
+            color: var(--text);
+            box-shadow: none
+        }
+
+        .btn--block {
+            width: 100%
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 22px
+        }
+
+        /* ==================== ПАЛИТРА ==================== */
+        .palette {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 14px
+        }
+
+        .swatch {
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            overflow: hidden;
+            background: #fff;
+            transition: var(--t);
+            position: relative
+        }
+
+        .swatch:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 30px rgba(29, 36, 48, .12)
+        }
+
+        .swatch__color {
+            height: 150px;
+            position: relative;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 12px
+        }
+
+        .swatch__hex {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 7px;
+            background: rgba(255, 255, 255, .88);
+            color: #111;
+            backdrop-filter: blur(4px)
+        }
+
+        .swatch__body {
+            padding: 13px
+        }
+
+        .swatch__rgb {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 11px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        .swatch__btns {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap
+        }
+
+        .chip {
+            border: 1px solid var(--line);
+            background: #fff;
+            border-radius: 8px;
+            padding: 7px 9px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text);
+            transition: var(--t);
+            line-height: 1
+        }
+
+        .chip:hover {
+            border-color: var(--accent);
+            color: var(--accent)
+        }
+
+        .chip.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff
+        }
+
+        .chip.star.active {
+            background: #f59e0b;
+            border-color: #f59e0b
+        }
+
+        .lock-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, .9);
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .1)
+        }
+
+        /* ==================== ИЗБРАННОЕ ==================== */
+        .fav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 12px
+        }
+
+        .fav {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
+            transition: var(--t)
+        }
+
+        .fav:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow)
+        }
+
+        .fav__color {
+            height: 72px;
+            cursor: pointer
+        }
+
+        .fav__meta {
+            padding: 9px;
+            text-align: center
+        }
+
+        .fav__hex {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700
+        }
+
+        .fav__actions {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+            margin-top: 6px
+        }
+
+        .fav__actions button {
+            border: none;
+            background: var(--bg);
+            border-radius: 6px;
+            width: 26px;
+            height: 26px;
+            font-size: 12px;
+            transition: var(--t)
+        }
+
+        .fav__actions button:hover {
+            background: var(--accent);
+            color: #fff
+        }
+
+        .empty {
+            text-align: center;
+            padding: 36px 16px;
+            color: var(--muted);
+            font-size: 14px;
+            border: 1px dashed var(--line);
+            border-radius: 12px;
+            background: #fbfcfd
+        }
+
+        /* ==================== КОНТРАСТ ==================== */
+        .contrast-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 26px
+        }
+
+        .pickers {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 12px;
+            align-items: end
+        }
+
+        .swap {
+            border: 1px solid var(--line);
+            background: #fff;
+            border-radius: 10px;
+            width: 40px;
+            height: 44px;
+            font-size: 17px;
+            transition: var(--t)
+        }
+
+        .swap:hover {
+            background: var(--accent-soft);
+            color: var(--accent)
+        }
+
+        .preview {
+            margin-top: 20px;
+            border-radius: 14px;
+            border: 1px solid var(--line);
+            min-height: 170px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 22px;
+            transition: var(--t)
+        }
+
+        .preview__big {
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: -.02em
+        }
+
+        .preview__small {
+            font-size: 14px;
+            margin-top: 6px;
+            opacity: .85
+        }
+
+        .preview__tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            margin-top: 14px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(127, 127, 127, .18)
+        }
+
+        .result {
+            margin-top: 20px
+        }
+
+        .ratio {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            margin-bottom: 16px
+        }
+
+        .ratio__num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 44px;
+            font-weight: 700;
+            letter-spacing: -.04em;
+            line-height: 1
+        }
+
+        .ratio__label {
+            font-size: 13px;
+            color: var(--muted)
+        }
+
+        .badges {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px
+        }
+
+        .badge {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 12px 14px;
+            background: #fbfcfd
+        }
+
+        .badge__top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px
+        }
+
+        .badge__name {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted)
+        }
+
+        .badge__val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700
+        }
+
+        .badge__status {
+            font-size: 13px;
+            font-weight: 800;
+            margin-top: 7px
+        }
+
+        .pass {
+            color: #0e9f6e
+        }
+
+        .fail {
+            color: #e04848
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            margin-left: 5px
+        }
+
+        .pill.yes {
+            background: #e4f7ef
+        }
+
+        .pill.no {
+            background: #fdeaea
+        }
+
+        .note {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 14px
+        }
+
+        /* ==================== МАТРИЦА ==================== */
+        .matrix-wrap {
+            overflow-x: auto
+        }
+
+        .matrix {
+            border-collapse: separate;
+            border-spacing: 5px;
+            width: 100%;
+            min-width: 520px
+        }
+
+        .matrix th {
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: var(--muted);
+            padding: 4px
+        }
+
+        .matrix th:first-child {
+            text-align: left
+        }
+
+        .matrix td {
+            border-radius: 9px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            height: 48px;
+            min-width: 64px;
+            border: 1px solid rgba(0, 0, 0, .06)
+        }
+
+        .matrix td.self {
+            background: #f1f2f5 !important;
+            color: #a8afbb !important
+        }
+
+        .legend {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+            font-size: 12px;
+            color: var(--muted)
+        }
+
+        .legend span {
+            display: flex;
+            align-items: center;
+            gap: 6px
+        }
+
+        .legend i {
+            width: 12px;
+            height: 12px;
+            border-radius: 4px;
+            display: inline-block
+        }
+
+        /* ==================== FOOTER / TOAST ==================== */
+        .footer {
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px;
+            padding: 34px 0 44px
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 26px;
+            left: 50%;
+            transform: translateX(-50%) translateY(14px);
+            background: #1d2430;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 11px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+            opacity: 0;
+            pointer-events: none;
+            transition: .25s;
+            z-index: 100
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0)
+        }
+
+        @media(max-width:980px) {
+            .controls {
+                grid-template-columns: repeat(2, 1fr)
+            }
+
+            .contrast-grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        @media(max-width:620px) {
+            .section {
+                margin-top: 24px
+            }
+
+            .card {
+                padding: 18px
+            }
+
+            .controls {
+                grid-template-columns: 1fr
+            }
+
+            .pickers {
+                grid-template-columns: 1fr;
+                gap: 10px
+            }
+
+            .swap {
+                width: 100%;
+                height: 36px
+            }
+
+            .header__links {
+                display: none
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-<!-- ===== ШАПКА ===== -->
-<header class="header">
- <div class="container header__inner">
-  <a class="logo" data-go="home" style="cursor:pointer"><span class="logo__icon">🌸</span><span class="logo__text">Абу<span>Сток</span></span></a>
-  <nav class="nav" id="nav">
-   <a data-go="home" class="active">Главная</a>
-   <a data-go="catalog">Каталог букетов</a>
-   <a data-go="delivery">Доставка и оплата</a>
-   <a data-go="about">О нас</a>
-   <a data-go="order">Заказ</a>
-  </nav>
-  <div class="header__actions">
-   <a href="tel:+79991234567" class="phone">📞 +996 (556) 175-538</a>
-   <button class="cart-btn" onclick="toggleDrawer(true)" title="Корзина">🛒<span class="cart-count" hidden>0</span></button>
-   <button class="burger" id="burger" aria-label="Меню">☰</button>
-  </div>
- </div>
-</header>
+    <!-- ===== ШАПКА ===== -->
+    <header class="header">
+        <div class="wrap header__in">
+            <div class="brand">
+                <div class="brand__logo"></div>
+                <div>
+                    <h1>Палитра</h1>
+                    <p>Генератор и менеджер цветов</p>
+                </div>
+            </div>
+            <div class="header__links">
+                <button class="link-btn"
+                    onclick="document.getElementById('palette-card').scrollIntoView()">Палитра</button>
+                <button class="link-btn"
+                    onclick="document.getElementById('fav-card').scrollIntoView()">Избранное</button>
+                <button class="link-btn"
+                    onclick="document.getElementById('contrast-card').scrollIntoView()">Контраст</button>
+            </div>
+        </div>
+    </header>
 
-<main>
-<!-- ===== ГЛАВНАЯ ===== -->
-<section class="page" id="page-home">
- <div class="hero">
-  <div class="container hero__content">
-   <span class="hero__badge">Свежесть каждый день</span>
-   <h1>Цветы, которые говорят за вас</h1>
-   <p>Собираем букеты из свежих цветов каждый день и доставляем их с заботой — к двери, в офис или к торжеству.</p>
-   <div class="hero__buttons">
-    <button class="btn btn--pink" data-go="catalog">Выбрать букет →</button>
-    <button class="btn btn--outline btn--white" data-go="about">Узнать о нас</button>
-   </div>
-  </div>
- </div>
- <section class="section"><div class="container"><div class="features">
-  <div class="feature"><div class="feature__icon">🌿</div><h3>Только свежие</h3><p>Цветы с аукционов каждый день</p></div>
-  <div class="feature"><div class="feature__icon">🚚</div><h3>В день заказа</h3><p>По городу от 2 часов</p></div>
-  <div class="feature"><div class="feature__icon">🎨</div><h3>Ручная работа</h3><p>Каждый букет уникален</p></div>
-  <div class="feature"><div class="feature__icon">💌</div><h3>Открытка в подарок</h3><p>Добавим ваши пожелания</p></div>
- </div></div></section>
- <section class="section section--pink"><div class="container">
-  <h2 class="section-title">Популярные букеты</h2>
-  <p class="section-subtitle">Те, что чаще всего выбирают наши клиенты — проверенная красота</p>
-  <div class="products" id="home-products"></div>
-  <div style="text-align:center;margin-top:40px"><button class="btn btn--outline" data-go="catalog">Смотреть весь каталог</button></div>
- </div></section>
- <section class="section"><div class="container about-grid">
-  <img class="about-img" src="https://images.unsplash.com/photo-1487530811176-3780de880c2d?auto=format&fit=crop&w=1000&q=80" alt="Флорист">
-  <div class="about-text">
-   <h2>Мы влюблены в цветы с 2014 года</h2>
-   <p>«Лепесток» — небольшой магазин с большой душой. Мы работаем напрямую с поставщиками и сами отбираем каждый стебель, чтобы букет стоял свежим как можно дольше.</p>
-   <p>Наши флористы не просто связывают цветы — они рассказывают вашу историю через форму, цвет и аромат.</p>
-   <div class="stats"><div><div class="stat__num">12 000+</div><div class="stat__label">букетов создано</div></div><div><div class="stat__num">98%</div><div class="stat__label">довольных клиентов</div></div><div><div class="stat__num">10 лет</div><div class="stat__label">на рынке</div></div></div>
-   <button class="btn" data-go="about" style="margin-top:14px">Подробнее о нас</button>
-  </div>
- </div></section>
- <section class="section section--green"><div class="container">
-  <h2 class="section-title">Как сделать заказ</h2><p class="section-subtitle">Всего четыре простых шага — и букет уже в пути</p>
-  <div class="steps">
-   <div class="step"><div class="step__num">1</div><h3>Выберите букет</h3><p>В каталоге или соберите свой</p></div>
-   <div class="step"><div class="step__num">2</div><h3>Оформите заказ</h3><p>Укажите адрес и дату доставки</p></div>
-   <div class="step"><div class="step__num">3</div><h3>Подтвердим</h3><p>Позвоним для уточнения деталей</p></div>
-   <div class="step"><div class="step__num">4</div><h3>Получите цветы</h3><p>С улыбкой и свежей открыткой</p></div>
-  </div>
- </div></section>
-</section>
+    <div class="wrap">
 
-<!-- ===== КАТАЛОГ ===== -->
-<section class="page" id="page-catalog" hidden>
- <div class="container"><div class="breadcrumbs"><span data-go="home" style="cursor:pointer">Главная</span><span>/</span>Каталог букетов</div></div>
- <div class="page-head"><h1>Каталог букетов</h1><p>Выберите букет по настроению — мы соберём его прямо перед доставкой, чтобы он оставался свежим.</p></div>
- <section class="section" style="padding-top:30px"><div class="container">
-  <div class="filters" id="filters">
-   <button class="filter-btn active" data-cat="all">Все букеты</button>
-   <button class="filter-btn" data-cat="Розы">Розы</button>
-   <button class="filter-btn" data-cat="Свадебные">Свадебные</button>
-   <button class="filter-btn" data-cat="Сезонные">Сезонные</button>
-   <button class="filter-btn" data-cat="Экзотика">Экзотика</button>
-  </div>
-  <div class="products" id="catalog-products"></div>
- </div></section>
-</section>
+        <!-- ===== УПРАВЛЕНИЕ ===== -->
+        <div class="section card">
+            <div class="card__head">
+                <div class="card__title"><span class="dot"></span>Настройки генератора</div>
+                <div class="card__hint">Замки 🔒 сохраняют цвет на месте при перегенерации</div>
+            </div>
+            <div class="controls">
+                <div class="field">
+                    <label for="baseColor">Базовый цвет</label>
+                    <div class="color-input">
+                        <input type="color" id="baseColor" value="#6C5CE7">
+                        <input type="text" id="baseHex" class="mono" value="#6C5CE7" maxlength="7" spellcheck="false">
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="scheme">Гармония</label>
+                    <select id="scheme">
+                        <option value="analogic">Аналогичная</option>
+                        <option value="complementary">Дополнительная</option>
+                        <option value="triadic">Триада</option>
+                        <option value="tetradic">Тетрада</option>
+                        <option value="split">Сплит-комплемент</option>
+                        <option value="mono">Монохроматическая</option>
+                        <option value="random">Случайная</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="count">Количество цветов</label>
+                    <div class="range-row"><span>3</span><strong id="countVal">5</strong><span>8</span></div>
+                    <input type="range" id="count" min="3" max="8" value="5">
+                </div>
+                <div class="field">
+                    <label>&nbsp;</label>
+                    <button class="btn btn--block" id="generateBtn">🎲 Сгенерировать</button>
+                </div>
+            </div>
+            <div class="actions">
+                <button class="btn btn--soft" id="copyAllBtn">⧉ Скопировать все HEX</button>
+                <button class="btn btn--outline" id="shuffleBtn">🔀 Случайный базовый</button>
+                <button class="btn btn--outline" id="unlockBtn">🔓 Снять все замки</button>
+            </div>
+        </div>
 
-<!-- ===== ДОСТАВКА ===== -->
-<section class="page" id="page-delivery" hidden>
- <div class="container"><div class="breadcrumbs"><span data-go="home" style="cursor:pointer">Главная</span><span>/</span>Доставка и оплата</div></div>
- <div class="page-head"><h1>Доставка и оплата</h1><p>Мы бережно довезём букет в идеальном состоянии — а оплатить его можно удобным для вас способом.</p></div>
- <section class="section"><div class="container">
-  <h2 class="section-title">Как мы доставляем</h2><p class="section-subtitle">Собственный курьер, специальная упаковка и точное время</p>
-  <div class="steps">
-   <div class="step"><div class="step__num">1</div><h3>Собираем</h3><p>Флорист создаёт букет перед отправкой</p></div>
-   <div class="step"><div class="step__num">2</div><h3>Упаковываем</h3><p>Защищаем цветы от ветра и холода</p></div>
-   <div class="step"><div class="step__num">3</div><h3>Везём</h3><p>Курьер доставляет в выбранный интервал</p></div>
-   <div class="step"><div class="step__num">4</div><h3>Вручаем</h3><p>С открыткой и искренней улыбкой ✨</p></div>
-  </div>
-  <div style="margin-top:50px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
-   <div class="feature"><div class="feature__icon">🏙️</div><h3>По городу</h3><p>Бесплатно от 5 000 ₽<br>Иначе — 390 ₽</p></div>
-   <div class="feature"><div class="feature__icon">🕑</div><h3>В день заказа</h3><p>При заказе до 14:00<br>Доставим сегодня</p></div>
-   <div class="feature"><div class="feature__icon">📍</div><h3>Точное время</h3><p>Укажите интервал<br>в форме заказа</p></div>
-  </div>
- </div></section>
- <section class="section section--pink"><div class="container">
-  <h2 class="section-title">Способы оплаты</h2><p class="section-subtitle">Выберите, как удобно именно вам</p>
-  <div class="features">
-   <div class="feature"><div class="feature__icon">💳</div><h3>Картой онлайн</h3><p>Visa, Mastercard, Мир</p></div>
-   <div class="feature"><div class="feature__icon">💵</div><h3>Курьеру</h3><p>Наличными или картой</p></div>
-   <div class="feature"><div class="feature__icon">🏦</div><h3>По счёту</h3><p>Для юридических лиц</p></div>
-   <div class="feature"><div class="feature__icon">📱</div><h3>СБП</h3><p>Оплата по QR-коду</p></div>
-  </div>
- </div></section>
- <section class="section"><div class="container" style="max-width:820px">
-  <h2 class="section-title">Частые вопросы</h2>
-  <div style="margin-top:30px">
-   <div class="feature" style="text-align:left;margin-bottom:16px"><h3>Можно ли перенести доставку?</h3><p>Да, позвоните не позднее чем за 3 часа — изменим дату или время.</p></div>
-   <div class="feature" style="text-align:left;margin-bottom:16px"><h3>Что если получателя нет дома?</h3><p>Курьер позвонит и согласует место встречи или оставит букет в приёмной.</p></div>
-   <div class="feature" style="text-align:left"><h3>Как ухаживать за букетом?</h3><p>Подрежьте стебли, поставьте в чистую воду и обновляйте её каждые два дня.</p></div>
-  </div>
-  <div style="text-align:center;margin-top:36px"><button class="btn btn--pink" data-go="order">Оформить доставку</button></div>
- </div></section>
-</section>
+        <!-- ===== ПАЛИТРА ===== -->
+        <div class="section card" id="palette-card">
+            <div class="card__head">
+                <div class="card__title"><span class="dot"></span>Текущая палитра</div>
+                <div class="card__hint">Нажмите на цвет, чтобы проверить его контраст</div>
+            </div>
+            <div class="palette" id="palette"></div>
+        </div>
 
-<!-- ===== О НАС ===== -->
-<section class="page" id="page-about" hidden>
- <div class="container"><div class="breadcrumbs"><span data-go="home" style="cursor:pointer">Главная</span><span>/</span>О нас</div></div>
- <div class="page-head"><h1>О магазине «Лепесток»</h1><p>Небольшая мастерская, где цветы превращаются в эмоции.</p></div>
- <section class="section"><div class="container about-grid">
-  <img class="about-img" src="https://images.unsplash.com/photo-1487530811176-3780de880c2d?auto=format&fit=crop&w=1000&q=80" alt="Флорист">
-  <div class="about-text">
-   <h2>Наша история</h2>
-   <p>Всё началось в 2014 году с маленькой витрины и мечты делать цветы доступными и по-настоящему живыми. Мы хотели, чтобы букет не просто стоял в вазе, а рассказывал историю того, кто его подарил.</p>
-   <p>Сегодня «Лепесток» — это команда флористов, которые каждый день приезжают на аукцион, выбирают лучшие стебли и собирают композиции вручную. Никаких шаблонов: даже один и тот же букет мы собираем по-разному, потому что цветы живые.</p>
-   <p>Мы верим, что внимание к деталям — это и есть забота. Поэтому каждая доставка сопровождается открыткой, а каждый клиент — звонком от нашего менеджера.</p>
-   <div class="stats"><div><div class="stat__num">12 000+</div><div class="stat__label">букетов создано</div></div><div><div class="stat__num">10 лет</div><div class="stat__label">на рынке</div></div><div><div class="stat__num">98%</div><div class="stat__label">клиентов довольны</div></div></div>
-  </div>
- </div></section>
- <section class="section section--pink"><div class="container">
-  <h2 class="section-title">Наши принципы</h2><p class="section-subtitle">То, что мы никогда не меняем</p>
-  <div class="features">
-   <div class="feature"><div class="feature__icon">🌱</div><h3>Честность</h3><p>Говорим правду о свежести и сроках</p></div>
-   <div class="feature"><div class="feature__icon">💚</div><h3>Забота</h3><p>Относимся к заказу как к подарку близкому</p></div>
-   <div class="feature"><div class="feature__icon">🎯</div><h3>Точность</h3><p>Соблюдаем время и детали заказа</p></div>
-   <div class="feature"><div class="feature__icon">✨</div><h3>Красота</h3><p>Ищем нестандартные решения каждый день</p></div>
-  </div>
- </div></section>
- <section class="section section--green"><div class="container" style="text-align:center;max-width:700px">
-  <h2 class="section-title">Хотите стать частью команды?</h2><p class="section-subtitle">Мы всегда рады талантливым флористам и неравнодушным людям.</p>
-  <a href="mailto:hello@lepestok.ru" class="btn btn--pink">Написать нам</a>
- </div></section>
-</section>
+        <!-- ===== ИЗБРАННОЕ ===== -->
+        <div class="section card" id="fav-card">
+            <div class="card__head">
+                <div class="card__title"><span class="dot" style="background:#f59e0b"></span>Избранные цвета <span
+                        id="favCount" style="color:var(--muted);font-size:13px">(0)</span></div>
+                <div class="card__hint">Сохраняются в браузере</div>
+            </div>
+            <div id="favorites"></div>
+        </div>
 
-<!-- ===== ЗАКАЗ ===== -->
-<section class="page" id="page-order" hidden>
- <div class="container"><div class="breadcrumbs"><span data-go="home" style="cursor:pointer">Главная</span><span>/</span>Заказ</div></div>
- <div class="page-head"><h1>Оформление заказа</h1><p>Проверьте состав заказа и заполните данные — мы скоро свяжемся с вами.</p></div>
- <section class="section" style="padding-top:30px"><div class="container">
-  <div id="order-wrap">
-   <form id="order-form" novalidate><div class="order-layout">
-    <div>
-     <h2 style="font-size:24px;margin-bottom:18px">Ваши букеты <span id="cart-count-text" style="color:var(--muted);font-size:16px">(0)</span></h2>
-     <div class="cart-items" id="cart-items"></div>
-     <h2 style="font-size:24px;margin:38px 0 18px">Данные для доставки</h2>
-     <div class="form-card"><div class="form-grid">
-      <div class="form-group"><label for="name">Ваше имя *</label><input type="text" id="name" name="name" placeholder="Как к вам обращаться" required></div>
-      <div class="form-group"><label for="phone">Телефон *</label><input type="tel" id="phone" name="phone" placeholder="+7 (999) 123-45-67" required></div>
-      <div class="form-group"><label for="email">E-mail</label><input type="email" id="email" name="email" placeholder="mail@example.com"></div>
-      <div class="form-group"><label for="deliveryDate">Дата доставки</label><input type="date" id="deliveryDate" name="deliveryDate"></div>
-      <div class="form-group form-group--full"><label for="address">Адрес доставки *</label><input type="text" id="address" name="address" placeholder="Улица, дом, квартира" required></div>
-      <div class="form-group form-group--full"><label for="payment">Способ оплаты</label><select id="payment" name="payment">
-       <option value="Картой онлайн">Картой онлайн</option><option value="Курьеру при получении">Курьеру при получении</option>
-       <option value="СБП (QR-код)">СБП (QR-код)</option><option value="По счёту для юрлица">По счёту для юрлица</option>
-      </select></div>
-      <div class="form-group form-group--full"><label for="comment">Комментарий и пожелания</label><textarea id="comment" name="comment" placeholder="Текст открытки, время доставки, пожелания к букету..."></textarea></div>
-     </div><p class="form-note">* Обязательные поля. Нажимая «Подтвердить заказ», вы соглашаетесь с условиями обработки персональных данных.</p></div>
+        <!-- ===== КОНТРАСТ ===== -->
+        <div class="section card" id="contrast-card">
+            <div class="card__head">
+                <div class="card__title"><span class="dot" style="background:#0e9f6e"></span>Проверка контрастности
+                </div>
+                <div class="card__hint">WCAG 2.1 · AA и AAA</div>
+            </div>
+            <div class="contrast-grid">
+                <div>
+                    <div class="pickers">
+                        <div class="field">
+                            <label for="fgColor">Текст</label>
+                            <div class="color-input">
+                                <input type="color" id="fgColor" value="#1D2430">
+                                <input type="text" id="fgHex" class="mono" value="#1D2430" maxlength="7"
+                                    spellcheck="false">
+                            </div>
+                        </div>
+                        <button class="swap" id="swapBtn" title="Поменять местами">⇄</button>
+                        <div class="field">
+                            <label for="bgColor">Фон</label>
+                            <div class="color-input">
+                                <input type="color" id="bgColor" value="#FFFFFF">
+                                <input type="text" id="bgHex" class="mono" value="#FFFFFF" maxlength="7"
+                                    spellcheck="false">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="preview" id="preview">
+                        <div class="preview__big">Aa Пример текста</div>
+                        <div class="preview__small">Так будет выглядеть ваш текст на этом фоне</div>
+                        <div class="preview__tag" id="previewTag">18px / 24px</div>
+                    </div>
+                </div>
+                <div class="result">
+                    <div class="ratio">
+                        <div class="ratio__num" id="ratioNum">—</div>
+                        <div class="ratio__label">коэффициент контраста<br>от 1 до 21</div>
+                    </div>
+                    <div class="badges">
+                        <div class="badge">
+                            <div class="badge__top"><span class="badge__name">Обычный текст</span><span
+                                    class="badge__val">AA 4.5 · AAA 7</span></div>
+                            <div class="badge__status" id="normalStatus">—</div>
+                        </div>
+                        <div class="badge">
+                            <div class="badge__top"><span class="badge__name">Крупный текст</span><span
+                                    class="badge__val">AA 3 · AAA 4.5</span></div>
+                            <div class="badge__status" id="largeStatus">—</div>
+                        </div>
+                    </div>
+                    <p class="note">Крупным считается текст от 18px обычный или от 14px жирный. Проверка выполняется по
+                        формуле относительной яркости WCAG.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== МАТРИЦА КОНТРАСТОВ ===== -->
+        <div class="section card">
+            <div class="card__head">
+                <div class="card__title"><span class="dot" style="background:#54a0ff"></span>Контраст между цветами
+                    палитры</div>
+                <div class="card__hint">Строка = текст, столбец = фон</div>
+            </div>
+            <div class="matrix-wrap">
+                <table class="matrix" id="matrix"></table>
+            </div>
+            <div class="legend">
+                <span><i style="background:#d9f5e8"></i> AAA (≥7)</span>
+                <span><i style="background:#e9f7d9"></i> AA (≥4.5)</span>
+                <span><i style="background:#fff3d6"></i> только крупный (≥3)</span>
+                <span><i style="background:#fde3e3"></i> недостаточно</span>
+            </div>
+        </div>
+
+        <footer class="footer">Палитра · сохранение в localStorage · копирование HEX и RGB · WCAG 2.1</footer>
     </div>
-    <aside class="summary">
-     <h3>Ваш заказ</h3>
-     <div class="summary__row"><span>Товары (<span id="cart-count-text-2">0 шт.</span>)</span><span id="cart-goods-total">0 ₽</span></div>
-     <div class="summary__row"><span>Доставка</span><span id="delivery-cost">390 ₽</span></div>
-     <div class="summary__row"><span>Открытка</span><span>Подарок</span></div>
-     <div class="summary__row summary__row--total"><span>Итого</span><span id="cart-total">0 ₽</span></div>
-     <button type="submit" class="btn btn--pink btn--block" style="margin-top:20px">Подтвердить заказ →</button>
-     <button type="button" class="btn btn--outline btn--block" style="margin-top:10px" data-go="catalog">Продолжить выбор</button>
-    </aside>
-   </div></form>
-  </div>
-  <div id="order-success" hidden></div>
- </div></section>
-</section>
 
-<!-- ===== АДМИНКА ===== -->
-<section class="page" id="page-admin" hidden>
- <div class="page-head"><h1>Панель заказов</h1><p>Заказы, оформленные в этом браузере.</p></div>
- <section class="section" style="padding-top:20px"><div class="container">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
-   <h2 style="font-size:24px">Заказов: <span id="orders-count">0</span></h2>
-   <button class="btn btn--outline" onclick="clearOrders()">Очистить историю</button>
-  </div>
-  <div id="orders-list"></div>
-  <div style="text-align:center;margin-top:24px"><button class="btn" data-go="home">На главную</button></div>
- </div></section>
-</section>
-</main>
+    <div class="toast" id="toast"></div>
 
-<!-- ===== ПОДВАЛ ===== -->
-<footer class="footer"><div class="container"><div class="footer__grid">
- <div><div class="logo"><span class="logo__icon">🌸</span><span class="logo__text">Лепе<span>сток</span></span></div><p style="margin-top:14px">Свежие букеты и бережная доставка каждый день.</p></div>
- <div><h4>Навигация</h4><a data-go="home" style="cursor:pointer">Главная</a><a data-go="catalog" style="cursor:pointer">Каталог букетов</a><a data-go="delivery" style="cursor:pointer">Доставка и оплата</a><a data-go="about" style="cursor:pointer">О нас</a><a data-go="order" style="cursor:pointer">Заказ</a></div>
- <div><h4>Контакты</h4><a href="tel:+79991234567">+7 (999) 123-45-67</a><a href="mailto:hello@lepestok.ru">hello@lepestok.ru</a><p>ул. Цветочная, 12<br>Ежедневно 9:00 — 21:00</p></div>
- <div><h4>Админ</h4><a data-go="admin" style="cursor:pointer">Панель заказов</a><p>Здесь видны все оформленные заказы этого браузера.</p></div>
-</div><div class="footer__bottom">© 2026 Цветочный магазин «Лепесток». Все права защищены.</div></div></footer>
+    <script>
+        /* ==================== УТИЛИТЫ ЦВЕТА ==================== */
+        const $ = id => document.getElementById(id);
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
-<!-- ===== ШТОРКА КОРЗИНЫ ===== -->
-<div class="overlay" id="cart-overlay">
- <aside class="drawer">
-  <div class="drawer__head"><h3>Ваша корзина</h3><button class="close-btn" onclick="toggleDrawer(false)">×</button></div>
-  <div id="drawer-items"></div>
-  <div class="drawer__total"><span>Итого:</span><span id="drawer-total">0 ₽</span></div>
-  <button class="btn btn--pink btn--block" data-go="order">Оформить заказ</button>
- </aside>
-</div>
+        function hexToRgb(hex) {
+            let h = String(hex).replace('#', '').trim();
+            if (h.length === 3) h = h.split('').map(c => c + c).join('');
+            if (!/^[0-9a-f]{6}$/i.test(h)) return null;
+            const n = parseInt(h, 16);
+            return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+        }
+        function rgbToHex({ r, g, b }) {
+            return '#' + [r, g, b].map(v => clamp(Math.round(v), 0, 255).toString(16).padStart(2, '0')).join('').toUpperCase();
+        }
+        function rgbToHsl({ r, g, b }) {
+            r /= 255; g /= 255; b /= 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b); const l = (max + min) / 2;
+            let h = 0, s = 0;
+            if (max !== min) {
+                const d = max - min; s = l > .5 ? d / (2 - max - min) : d / (max + min);
+                if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+                else if (max === g) h = (b - r) / d + 2;
+                else h = (r - g) / d + 4;
+                h /= 6;
+            }
+            return { h: h * 360, s: s * 100, l: l * 100 };
+        }
+        function hslToRgb(h, s, l) {
+            h = ((h % 360) + 360) % 360 / 360; s = clamp(s, 0, 100) / 100; l = clamp(l, 0, 100) / 100;
+            if (s === 0) { const v = l * 255; return { r: v, g: v, b: v } }
+            const q = l < .5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+            const f = (t) => { if (t < 0) t += 1; if (t > 1) t -= 1; if (t < 1 / 6) return p + (q - p) * 6 * t; if (t < .5) return q; if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6; return p };
+            return { r: f(h + 1 / 3) * 255, g: f(h) * 255, b: f(h - 1 / 3) * 255 };
+        }
+        function luminance(hex) {
+            const c = hexToRgb(hex); if (!c) return 0;
+            const a = [c.r, c.g, c.b].map(v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4) });
+            return .2126 * a[0] + .7152 * a[1] + .0722 * a[2];
+        }
+        function contrast(h1, h2) {
+            const a = luminance(h1), b = luminance(h2);
+            return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
+        }
+        function rgbString(hex) { const c = hexToRgb(hex); return c ? `rgb(${c.r}, ${c.g}, ${c.b})` : '—' }
+        function readableText(hex) { return luminance(hex) > .42 ? '#111111' : '#FFFFFF' }
+        function randomHex() { return rgbToHex({ r: Math.random() * 256, g: Math.random() * 256, b: Math.random() * 256 }) }
 
-<script>
-/* ==================== ДАННЫЕ ==================== */
-const PRODUCTS = [
- {id:'p1',name:'Розовый рассвет',price:3500,cat:'Розы',tag:'Хит',desc:'Нежные розы с эвкалиптом — идеальное признание в любви.',img:'https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=800&q=80'},
- {id:'p2',name:'Летний букет',price:2900,cat:'Сезонные',desc:'Яркие сезонные цветы, воздушная композиция с зеленью.',img:'https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=800&q=80'},
- {id:'p3',name:'Белая нежность',price:4200,cat:'Свадебные',tag:'Свадебный',desc:'Белые розы и пионы для самого особенного дня.',img:'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=800&q=80'},
- {id:'p4',name:'Красная страсть',price:5100,cat:'Розы',tag:'Хит',desc:'21 красная роза с гипсофилой. Признание без слов.',img:'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=800&q=80'},
- {id:'p5',name:'Полевые цветы',price:2600,cat:'Сезонные',desc:'Ромашки, василёк и клевер — тёплое летнее настроение.',img:'https://images.unsplash.com/photo-1462275646964-a0e3386b89fa?auto=format&fit=crop&w=800&q=80'},
- {id:'p6',name:'Экзотика',price:6800,cat:'Экзотика',tag:'Премиум',desc:'Орхидеи, антуриум и тропическая зелень для смелых.',img:'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80'},
- {id:'p7',name:'Букет невесты',price:7500,cat:'Свадебные',desc:'Пионы и фрезии в изящной форме — создан для торжества.',img:'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=800&q=80'},
- {id:'p8',name:'Хризантемы',price:2400,cat:'Сезонные',desc:'Стойкий букет на каждый день — радует больше двух недель.',img:'https://images.unsplash.com/photo-1508610048659-a06b669e3321?auto=format&fit=crop&w=800&q=80'},
- {id:'p9',name:'Весенние тюльпаны',price:2100,cat:'Сезонные',desc:'25 тюльпанов пастельных оттенков — символ весны.',img:'https://images.unsplash.com/photo-1520763185298-1b434c919102?auto=format&fit=crop&w=800&q=80'}
-];
-const CART_KEY='lepestok_cart',ORDERS_KEY='lepestok_orders';
-const money=n=>n.toLocaleString('ru-RU')+' ₽';
+        /* ==================== СОСТОЯНИЕ ==================== */
+        const FAV_KEY = 'palette_favorites';
+        let palette = [];
+        let locks = Array(8).fill(false);
+        let favorites = loadFavorites();
 
-/* ==================== ROUTER ==================== */
-function go(page){
- if(!['home','catalog','delivery','about','order','admin'].includes(page)) page='home';
- document.querySelectorAll('.page').forEach(p=>p.hidden=p.id!=='page-'+page);
- document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.go===page));
- if(page==='order'){renderCart();}
- if(page==='admin'){renderOrders();}
- if(location.hash.slice(1)!==page) history.pushState(null,'','#'+page);
- window.scrollTo(0,0);
- toggleDrawer(false);
-}
-window.addEventListener('popstate',()=>go(location.hash.slice(1)||'home'));
-document.addEventListener('click',e=>{
- const el=e.target.closest('[data-go]');
- if(el){e.preventDefault();go(el.dataset.go);}
-});
+        function loadFavorites() { try { const v = JSON.parse(localStorage.getItem(FAV_KEY)); return Array.isArray(v) ? v : [] } catch (e) { return [] } }
+        function saveFavorites() { localStorage.setItem(FAV_KEY, JSON.stringify(favorites)) }
+        function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 1900) }
+        async function copy(text, label) {
+            try {
+                if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text) }
+                else { const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove() }
+                toast((label || text) + ' скопировано');
+            } catch (e) { toast('Не удалось скопировать') }
+        }
 
-/* ==================== КАРТОЧКИ ==================== */
-function cardHTML(p){
- return `<article class="product" data-cat="${p.cat}">
-  <div class="product__img-wrap"><img src="${p.img}" alt="${p.name}">${p.tag?`<span class="product__tag">${p.tag}</span>`:''}</div>
-  <div class="product__body"><h3 class="product__title">${p.name}</h3><p class="product__desc">${p.desc}</p>
-   <div class="product__footer"><div class="product__price">${money(p.price)}</div>
-   <button class="btn btn--pink" onclick="addToCart('${p.id}')">В корзину</button></div></div></article>`;
-}
-function renderProducts(){
- document.getElementById('home-products').innerHTML=PRODUCTS.slice(0,3).map(cardHTML).join('');
- document.getElementById('catalog-products').innerHTML=PRODUCTS.map(cardHTML).join('');
- document.querySelectorAll('#filters .filter-btn').forEach(btn=>btn.addEventListener('click',()=>{
-  document.querySelectorAll('#filters .filter-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');const c=btn.dataset.cat;
-  document.querySelectorAll('#catalog-products .product').forEach(card=>card.style.display=(c==='all'||card.dataset.cat===c)?'flex':'none');
- }));
-}
+        /* ==================== ГЕНЕРАЦИЯ ==================== */
+        const SCHEMES = {
+            analogic: [-60, -30, -15, 0, 20, 40, 60, 80],
+            complementary: [0, 180, 0, 180, 30, 210, 150, 330],
+            triadic: [0, 120, 240, 0, 120, 240, 60, 180],
+            tetradic: [0, 90, 180, 270, 0, 90, 180, 270],
+            split: [0, 150, 210, 0, 150, 210, 30, 180],
+            mono: [0, 0, 0, 0, 0, 0, 0, 0],
+            random: null
+        };
+        const LIGHTS = [58, 76, 42, 88, 30, 64, 50, 70];
+        const SATS = [72, 58, 84, 46, 90, 66, 78, 54];
 
-/* ==================== КОРЗИНА ==================== */
-function getCart(){try{return JSON.parse(localStorage.getItem(CART_KEY))||[]}catch(e){return[]}}
-function saveCart(c){localStorage.setItem(CART_KEY,JSON.stringify(c));updateCount()}
-function findProduct(id){return PRODUCTS.find(p=>p.id===id)}
-function addToCart(id){const p=findProduct(id);if(!p)return;const c=getCart();const it=c.find(x=>x.id===id);if(it)it.qty++;else c.push({id,name:p.name,price:p.price,image:p.img,qty:1});saveCart(c);renderCart();renderDrawer();toast(`«${p.name}» добавлен в корзину`)}
-function changeQty(id,d){const c=getCart(),it=c.find(x=>x.id===id);if(!it)return;it.qty+=d;if(it.qty<=0)c.splice(c.indexOf(it),1);saveCart(c);renderCart();renderDrawer()}
-function removeFromCart(id){saveCart(getCart().filter(x=>x.id!==id));renderCart();renderDrawer()}
-const count=()=>getCart().reduce((s,p)=>s+p.qty,0);
-const subtotal=()=>getCart().reduce((s,p)=>s+p.price*p.qty,0);
-const deliveryCost=()=>subtotal()>=5000?0:390;
-function updateCount(){document.querySelectorAll('.cart-count').forEach(el=>{const c=count();el.textContent=c;el.hidden=c===0})}
-function renderCart(){
- const box=document.getElementById('cart-items');if(!box)return;
- const c=getCart();
- box.innerHTML=c.length?c.map(p=>`<div class="cart-item">
-  <img src="${p.image}" alt="${p.name}"><div class="cart-item__info"><h4>${p.name}</h4><p>${money(p.price)} / шт.</p>
-  <div class="qty"><button type="button" onclick="changeQty('${p.id}',-1)">−</button><span>${p.qty}</span><button type="button" onclick="changeQty('${p.id}',1)">+</button></div></div>
-  <div class="cart-item__sum">${money(p.price*p.qty)}</div><button class="remove-btn" onclick="removeFromCart('${p.id}')">✕</button></div>`).join('')
-  :`<div class="cart-empty"><div class="cart-empty__icon">💐</div><h3>Корзина пока пуста</h3><p style="color:var(--muted);margin:8px 0 20px">Выберите букет в каталоге — мы бережно доставим его в срок.</p><button class="btn" data-go="catalog">Перейти в каталог</button></div>`;
- const t=document.getElementById('cart-total'),d=document.getElementById('delivery-cost'),g=document.getElementById('cart-goods-total'),
-       c1=document.getElementById('cart-count-text'),c2=document.getElementById('cart-count-text-2');
- if(t)t.textContent=money(subtotal()+deliveryCost());
- if(d)d.textContent=deliveryCost()?money(deliveryCost()):'Бесплатно';
- if(g)g.textContent=money(subtotal());
- if(c1)c1.textContent=count();if(c2)c2.textContent=count()+' шт.';
-}
-function renderDrawer(){
- const box=document.getElementById('drawer-items');if(!box)return;const c=getCart();
- box.innerHTML=c.length?c.map(p=>`<div class="cart-item" style="box-shadow:none;padding:8px 0;border-bottom:1px solid #eee">
-  <img src="${p.image}" style="width:60px;height:60px"><div class="cart-item__info"><h4 style="font-size:15px">${p.name}</h4><p>${p.qty} шт. × ${money(p.price)}</p></div>
-  <button class="remove-btn" onclick="removeFromCart('${p.id}')">✕</button></div>`).join(''):'<p style="color:var(--muted);text-align:center;padding:20px">Корзина пуста 🌿</p>';
- document.getElementById('drawer-total').textContent=money(subtotal());
-}
-function toggleDrawer(open){document.getElementById('cart-overlay').classList.toggle('open',open)}
-function toast(msg){let el=document.getElementById('toast');if(!el){el=document.createElement('div');el.id='toast';el.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:14px 24px;border-radius:50px;box-shadow:var(--shadow);font-size:14px;z-index:300;transition:opacity .3s;opacity:0';document.body.appendChild(el)}el.textContent=msg;el.style.opacity='1';clearTimeout(el._t);el._t=setTimeout(()=>el.style.opacity='0',2200)}
+        function generate() {
+            const n = +$('count').value;
+            const base = hexToRgb($('baseHex').value) || hexToRgb($('baseColor').value) || hexToRgb('#6C5CE7');
+            const scheme = $('scheme').value;
+            const hsl = rgbToHsl(base);
+            const offsets = SCHEMES[scheme];
+            const next = [];
+            for (let i = 0; i < n; i++) {
+                if (locks[i] && palette[i]) { next.push(palette[i]); continue }
+                let h, s, l;
+                if (scheme === 'random') {
+                    h = Math.random() * 360; s = 38 + Math.random() * 52; l = 30 + Math.random() * 55;
+                } else {
+                    h = hsl.h + (offsets[i % offsets.length]) + (scheme === 'mono' ? 0 : (Math.random() * 14 - 7));
+                    s = scheme === 'mono' ? clamp(hsl.s - 18 + i * 5, 18, 95) : clamp(hsl.s * .45 + SATS[i % 8] * .55 + (Math.random() * 10 - 5), 25, 95);
+                    l = scheme === 'mono' ? clamp(24 + i * (62 / Math.max(n, 1)), 20, 90) : clamp(LIGHTS[i % 8] + (Math.random() * 10 - 5), 18, 92);
+                }
+                next.push(rgbToHex(hslToRgb(h, s, l)));
+            }
+            palette = next;
+            renderPalette(); renderMatrix();
+        }
 
-/* ==================== ЗАКАЗ ==================== */
-document.getElementById('order-form').addEventListener('submit',e=>{
- e.preventDefault();const form=e.target,c=getCart();
- if(!c.length){toast('Сначала добавьте букеты в корзину');return}
- let ok=true;
- form.querySelectorAll('[required]').forEach(f=>{const good=f.value.trim()!=='';f.classList.toggle('input-error',!good);if(!good)ok=false});
- const phone=form.elements['phone'];if(phone&&phone.value.replace(/\D/g,'').length<10){phone.classList.add('input-error');ok=false}
- if(!ok){toast('Проверьте правильность заполнения полей');return}
- const v=k=>form.elements[k]?form.elements[k].value.trim():'';
- const order={number:'ЛП-'+Date.now().toString().slice(-6),date:new Date().toLocaleString('ru-RU'),
-  customer:{name:v('name'),phone:v('phone'),email:v('email'),address:v('address'),deliveryDate:v('deliveryDate'),payment:v('payment'),comment:v('comment')},
-  items:c.map(({id,name,price,qty})=>({id,name,price,qty})),goodsTotal:subtotal(),delivery:deliveryCost(),total:subtotal()+deliveryCost(),status:'Новый'};
- const orders=JSON.parse(localStorage.getItem(ORDERS_KEY)||'[]');orders.push(order);localStorage.setItem(ORDERS_KEY,JSON.stringify(orders));localStorage.removeItem(CART_KEY);
- document.getElementById('order-wrap').hidden=true;
- const s=document.getElementById('order-success');s.hidden=false;
- s.innerHTML=`<div class="success"><div class="success__icon">🎉</div><h1>Заказ принят!</h1>
-  <p>Спасибо, ${order.customer.name}! Наш флорист уже приступает к вашему букету.</p>
-  <div class="success__num">Номер заказа: ${order.number}</div>
-  <p>Свяжемся с вами по номеру <strong>${order.customer.phone}</strong>.<br>Сумма: <strong>${money(order.total)}</strong></p>
-  <button class="btn" data-go="catalog" style="margin-top:20px">Сделать ещё заказ</button></div>`;
- updateCount();sendOrderNotification(order);window.scrollTo(0,0);
-});
+        /* ==================== ОТОБРАЖЕНИЕ ==================== */
+        function renderPalette() {
+            const box = $('palette');
+            box.innerHTML = palette.map((hex, i) => {
+                const fav = favorites.includes(hex);
+                const text = readableText(hex);
+                return `<div class="swatch">
+   ${locks[i] ? '<div class="lock-badge" title="Закреплён">🔒</div>' : ''}
+   <div class="swatch__color" style="background:${hex}" onclick="useInContrast('${hex}')">
+    <span class="swatch__hex" style="color:${text === '#111111' ? '#111111' : '#111111'}">${hex}</span>
+   </div>
+   <div class="swatch__body">
+    <div class="swatch__rgb" title="${rgbString(hex)}">${rgbString(hex)}</div>
+    <div class="swatch__btns">
+     <button class="chip" onclick="copy('${hex}','HEX')">HEX</button>
+     <button class="chip" onclick="copy('${rgbString(hex).replace(/,/g, '')}','RGB')">RGB</button>
+     <button class="chip star ${fav ? 'active' : ''}" onclick="toggleFav('${hex}')" title="В избранное">${fav ? '★' : '☆'}</button>
+     <button class="chip ${locks[i] ? 'active' : ''}" onclick="toggleLock(${i})" title="Закрепить">🔒</button>
+    </div>
+   </div></div>`;
+            }).join('');
+        }
 
-/* Уведомление: раскомментируйте вариант и подставьте свои данные */
-function sendOrderNotification(o){
- const text=`🌸 Новый заказ ${o.number}\nИмя: ${o.customer.name}\nТелефон: ${o.customer.phone}\nАдрес: ${o.customer.address}\nДата: ${o.customer.deliveryDate||'скорее'}\nОплата: ${o.customer.payment}\n\n`+
-  o.items.map(i=>`• ${i.name} × ${i.qty} = ${money(i.price*i.qty)}`).join('\n')+`\n\nИТОГО: ${money(o.total)}`;
- /* fetch('https://api.telegram.org/botТОКЕН/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:'CHAT_ID',text})}); */
- /* fetch('https://formspree.io/f/ВАШ_ИД',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({order:text,email:o.customer.email})}); */
- console.log(text);
-}
+        function renderFavorites() {
+            const box = $('favorites'); $('favCount').textContent = '(' + favorites.length + ')';
+            if (!favorites.length) { box.innerHTML = '<div class="empty">Пока нет сохранённых цветов. Нажмите ☆ на любом цвете палитры.</div>'; return }
+            box.innerHTML = '<div class="fav-grid">' + favorites.map((hex, i) => `<div class="fav">
+  <div class="fav__color" style="background:${hex}" onclick="useInContrast('${hex}')" title="Проверить контраст"></div>
+  <div class="fav__meta">
+   <div class="fav__hex">${hex}</div>
+   <div class="fav__actions">
+    <button onclick="copy('${hex}','HEX')" title="Копировать HEX">⧉</button>
+    <button onclick="copy('${rgbString(hex).replace(/,/g, '')}','RGB')" title="Копировать RGB">R</button>
+    <button onclick="toggleFav('${hex}')" title="Удалить">✕</button>
+   </div></div></div>`).join('') + '</div>';
+        }
 
-/* ==================== АДМИНКА ==================== */
-function renderOrders(){
- const orders=JSON.parse(localStorage.getItem(ORDERS_KEY)||'[]'),box=document.getElementById('orders-list');
- document.getElementById('orders-count').textContent=orders.length;
- if(!orders.length){box.innerHTML='<div class="cart-empty"><div class="cart-empty__icon">📋</div><h3>Заказов пока нет</h3><p style="color:var(--muted)">Оформите тестовый заказ на странице «Заказ».</p></div>';return}
- box.innerHTML=orders.slice().reverse().map(o=>`<div class="form-card" style="margin-bottom:18px">
-  <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px"><h3 style="font-size:20px">Заказ ${o.number}</h3><span style="color:var(--pink);font-weight:600">${o.status}</span></div>
-  <p style="font-size:13px;color:var(--muted);margin-bottom:14px">${o.date}</p>
-  <div class="form-grid" style="gap:8px 24px;font-size:14px">
-   <div><strong>Клиент:</strong> ${o.customer.name}</div><div><strong>Телефон:</strong> ${o.customer.phone}</div>
-   <div><strong>Адрес:</strong> ${o.customer.address}</div><div><strong>Дата:</strong> ${o.customer.deliveryDate||'скорее'}</div>
-   <div><strong>Оплата:</strong> ${o.customer.payment}</div><div><strong>E-mail:</strong> ${o.customer.email||'—'}</div>
-   <div class="form-group--full"><strong>Комментарий:</strong> ${o.customer.comment||'—'}</div></div>
-  <div style="margin-top:16px;border-top:1px dashed #d9e0da;padding-top:14px">
-   ${o.items.map(i=>`<div class="summary__row"><span>${i.name} × ${i.qty}</span><span>${money(i.price*i.qty)}</span></div>`).join('')}
-   <div class="summary__row summary__row--total"><span>Итого</span><span>${money(o.total)}</span></div></div></div>`).join('');
-}
-function clearOrders(){if(confirm('Удалить всю историю заказов?')){localStorage.removeItem(ORDERS_KEY);renderOrders()}}
+        function toggleFav(hex) {
+            if (favorites.includes(hex)) { favorites = favorites.filter(h => h !== hex); toast('Удалено из избранного') }
+            else { favorites.unshift(hex); toast('Добавлено в избранное') }
+            saveFavorites(); renderFavorites(); renderPalette();
+        }
+        function toggleLock(i) { locks[i] = !locks[i]; renderPalette() }
+        function useInContrast(hex) {
+            const bg = luminance(hex) > .42 ? '#1D2430' : '#FFFFFF';
+            $('fgColor').value = hex; $('fgHex').value = hex;
+            $('bgColor').value = bg; $('bgHex').value = bg;
+            updateContrast();
+            $('contrast-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
 
-/* ==================== СТАРТ ==================== */
-document.addEventListener('DOMContentLoaded',()=>{
- renderProducts();updateCount();renderCart();renderDrawer();
- document.getElementById('burger').addEventListener('click',()=>document.getElementById('nav').classList.toggle('open'));
- document.getElementById('cart-overlay').addEventListener('click',e=>{if(e.target.id==='cart-overlay')toggleDrawer(false)});
- const d=document.getElementById('deliveryDate');d.min=new Date().toISOString().split('T')[0];
- go(location.hash.slice(1)||'home');
-});
-</script>
+        /* ==================== КОНТРАСТ ==================== */
+        function updateContrast() {
+            const fg = $('fgHex').value, bg = $('bgHex').value;
+            const c = hexToRgb(fg), b = hexToRgb(bg);
+            if (!c || !b) return;
+            $('fgColor').value = fg; $('bgColor').value = bg;
+            const ratio = contrast(fg, bg);
+            $('ratioNum').textContent = ratio.toFixed(2);
+            $('preview').style.background = bg;
+            $('preview').style.color = fg;
+            const p = $('preview'); p.firstElementChild.style.color = fg; p.children[1].style.color = fg;
+            $('previewTag').style.background = hexToRgb(fg) ? `rgba(${hexToRgb(fg).r},${hexToRgb(fg).g},${hexToRgb(fg).b},.12)` : 'transparent';
+
+            const normalAA = ratio >= 4.5, normalAAA = ratio >= 7, largeAA = ratio >= 3, largeAAA = ratio >= 4.5;
+            const status = (aa, aaa) => {
+                if (aaa) return `<span class="pass">✓ AAA</span><span class="pill yes">И AA</span>`;
+                if (aa) return `<span class="pass">✓ AA</span><span class="pill no">не AAA</span>`;
+                return `<span class="fail">✕ Не проходит</span>`;
+            };
+            $('normalStatus').innerHTML = status(normalAA, normalAAA);
+            $('largeStatus').innerHTML = status(largeAA, largeAAA);
+        }
+
+        function renderMatrix() {
+            const t = $('matrix');
+            if (!palette.length) { t.innerHTML = ''; return }
+            let html = '<thead><tr><th>текст / фон</th>';
+            palette.forEach(c => html += `<th>${c}</th>`);
+            html += '</tr></thead><tbody>';
+            palette.forEach(fg => {
+                html += `<tr><th>${fg}</th>`;
+                palette.forEach(bg => {
+                    if (fg === bg) { html += '<td class="self">—</td>'; return }
+                    const r = contrast(fg, bg);
+                    let bgStyle = '#fde3e3', fgStyle = '#b4232b';
+                    if (r >= 7) { bgStyle = '#d9f5e8'; fgStyle = '#0a7a50' }
+                    else if (r >= 4.5) { bgStyle = '#e9f7d9'; fgStyle = '#3d7a1f' }
+                    else if (r >= 3) { bgStyle = '#fff3d6'; fgStyle = '#9a6b00' }
+                    html += `<td style="background:${bgStyle};color:${fgStyle}" title="${fg} на ${bg}">${r.toFixed(1)}</td>`;
+                });
+                html += '</tr>';
+            });
+            t.innerHTML = html + '</tbody>';
+        }
+
+        /* ==================== СОБЫТИЯ ==================== */
+        $('generateBtn').addEventListener('click', generate);
+        $('baseColor').addEventListener('input', e => { $('baseHex').value = e.target.value.toUpperCase(); generate() });
+        $('baseHex').addEventListener('input', e => {
+            let v = e.target.value.trim();
+            if (!v.startsWith('#')) v = '#' + v;
+            if (hexToRgb(v)) { $('baseColor').value = v; generate() }
+        });
+        $('count').addEventListener('input', e => { $('countVal').textContent = e.target.value; generate() });
+        $('scheme').addEventListener('change', generate);
+        $('shuffleBtn').addEventListener('click', () => { const h = randomHex(); $('baseHex').value = h; $('baseColor').value = h; generate() });
+        $('unlockBtn').addEventListener('click', () => { locks = Array(8).fill(false); renderPalette(); toast('Замки сняты') });
+        $('copyAllBtn').addEventListener('click', () => copy(palette.join(', '), 'Палитра'));
+        $('swapBtn').addEventListener('click', () => {
+            const f = $('fgHex').value, b = $('bgHex').value;
+            $('fgHex').value = b; $('bgHex').value = f; updateContrast();
+        });
+        ['fgColor', 'bgColor'].forEach(id => $(id).addEventListener('input', e => {
+            const hex = e.target.value.toUpperCase();
+            $(id === 'fgColor' ? 'fgHex' : 'bgHex').value = hex; updateContrast();
+        }));
+        ['fgHex', 'bgHex'].forEach(id => $(id).addEventListener('input', e => {
+            let v = e.target.value.trim().toUpperCase(); if (!v.startsWith('#')) v = '#' + v;
+            e.target.value = v;
+            if (hexToRgb(v)) updateContrast();
+        }));
+
+        /* ==================== СТАРТ ==================== */
+        renderFavorites();
+        generate();
+        updateContrast();
+    </script>
 </body>
+
 </html>
